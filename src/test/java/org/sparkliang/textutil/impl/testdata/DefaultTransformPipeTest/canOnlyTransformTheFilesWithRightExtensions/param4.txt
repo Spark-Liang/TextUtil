@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema" xmlns="http://www.informatica.com/Parameterization/1.0">
+    <project name="Orders">
+        <workflow name="Customer_Workflow">
+            <parameter name="TEST_PARAM">100</parameter>
+            <parameter name="TEST_PARAM_OTHER">200</parameter>
+        </workflow>
+    </project>
+</root>

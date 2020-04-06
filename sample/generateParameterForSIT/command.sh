@@ -1,0 +1,1 @@
+java -jar ../../target/text-util-1.0.jar --default-conf-dir target/sit.properties source target

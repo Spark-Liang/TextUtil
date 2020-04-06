@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root version="2.0" xmlns="http://www.informatica.com/Parameterization/1.0">
+    <project name="AOO1_COMMON_COMPONENT">
+        <folder name="V4_CCF">
+            <workflow name="wf_CCF_AUTO_CREATE_TABLE_PARTITIONS">
+                <parameter name="SQLDB_Connection">Connection1</parameter>
+                <parameter name="GOESLSDC_Onwer">GOESLSDC</parameter>
+            </workflow>
+        </folder>
+
+    </project>
+</root>
