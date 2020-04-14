@@ -1,5 +1,12 @@
 package org.sparkliang.textutil.exception;
 
+/**
+ * The common exception in text-util project.
+ *
+ * @author spark
+ * @date 2020-04-07
+ * @since 1.0
+ */
 public class TextTransformUtilException extends RuntimeException {
     public TextTransformUtilException() {
         super();

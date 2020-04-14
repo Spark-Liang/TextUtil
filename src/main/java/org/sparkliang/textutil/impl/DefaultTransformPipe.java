@@ -1,6 +1,8 @@
 package org.sparkliang.textutil.impl;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sparkliang.textutil.api.TransformPipe;
 import org.sparkliang.textutil.api.Transformer;
 import org.sparkliang.textutil.exception.TextTransformUtilException;
@@ -12,7 +14,24 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Properties;
 
+
+/**
+ * The default implementation on searching the parameter files.<br>
+ * Configurations:
+ * <p>
+ *     <ul>
+ *         <li>pipe.conf.extensions: The file extensions of the files that need to transform. We separate the multiple extension by comma ",".</li>
+ *     </ul>
+ * </p>
+ * <p>
+ * The we can filter the files we need to transform by the file extension. If we
+ *
+ * @author spark
+ * @date 2020-04-07
+ * @since 1.0
+ */
 public class DefaultTransformPipe implements TransformPipe {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTransformPipe.class);
 
     public static final String EXTENSIONS_CONF_NAME = "pipe.conf.extensions";
     public static final String EXTENSIONS_SEPARATOR = ",";
@@ -75,7 +94,9 @@ public class DefaultTransformPipe implements TransformPipe {
     public synchronized void set(Properties conf) {
         if (conf.containsKey(EXTENSIONS_CONF_NAME)) {
             String extensionsConf = conf.getProperty(EXTENSIONS_CONF_NAME).trim();
-            this.fileExtensions = extensionsConf.split(EXTENSIONS_SEPARATOR);
+            String[] extensions = extensionsConf.split(EXTENSIONS_SEPARATOR);
+            LOGGER.debug("will only apply change on the files with extension in:{}.", extensions);
+            this.fileExtensions = extensions;
         }
 
     }

@@ -2,6 +2,8 @@ package org.sparkliang.textutil.app;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sparkliang.textutil.api.TransformPipe;
 import org.sparkliang.textutil.api.Transformer;
 import org.sparkliang.textutil.exception.TextTransformUtilException;
@@ -16,7 +18,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * The entry point of entire program.
+ *
+ * @author spark
+ * @date 2020-04-14
+ * @since 1.0
+ */
+@SuppressWarnings("AlibabaClassNamingShouldBeCamel")
 public final class CLI {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CLI.class);
+
     static Options OPTIONS = null;
     static String HELP_STRING = null;
 
@@ -42,6 +54,7 @@ public final class CLI {
             System.err.println("Error:" + e.getMessage() + "\n" + HELP_STRING);
             System.exit(-1);
         } catch (Exception e) {
+            LOGGER.error("Unknown Error!", e);
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
             e.printStackTrace(new PrintStream(bao));
             System.err.println("Unknown Error:" + e.getMessage() + "\n" + bao.toString() + "\n" + HELP_STRING);
@@ -57,8 +70,8 @@ public final class CLI {
         assertClassExistsAndImplementAndCreateInstance(transformerName, Transformer.class);
 
         String[] remainArgs = commandLine.getArgs();
-        if (remainArgs.length != 2) {
-            throw new TextTransformUtilException("Invalid arguments.");
+        if (2 != remainArgs.length) {
+            logAndThrowException("Invalid arguments.");
         }
         SOURCE_PATH = remainArgs[0];
         TARGET_PATH = remainArgs[1];
@@ -68,21 +81,19 @@ public final class CLI {
         try {
             Class<?> clazz = Class.forName(className);
             if (!implementsClass.isAssignableFrom(clazz)) {
-                throw new TextTransformUtilException(
-                        String.format("The given class \"%s\" is not implements \"%s\".", className, implementsClass.getName())
-                );
+                logAndThrowException(String.format("The given class \"%s\" is not implements \"%s\".", className, implementsClass.getName()));
             }
             Constructor<?> constructor = clazz.getConstructor();
             Object instance = constructor.newInstance();
             INSTANCE_MAP.put(implementsClass, implementsClass.cast(instance));
         } catch (ClassNotFoundException e) {
-            throw new TextTransformUtilException(String.format("The given class \"%s\" is not exists.", className));
+            logAndThrowException(String.format("The given class \"%s\" is not exists.", className));
         } catch (NoSuchMethodException e) {
-            throw new TextTransformUtilException(String.format("The given class \"%s\" does not have the default constructor.", className));
+            logAndThrowException(String.format("The given class \"%s\" does not have the default constructor.", className));
         } catch (IllegalAccessException e) {
-            throw new TextTransformUtilException(String.format("The default constructor of \"%s\" is unable to access.", className));
+            logAndThrowException(String.format("The default constructor of \"%s\" is unable to access.", className));
         } catch (InstantiationException | InvocationTargetException e) {
-            throw new TextTransformUtilException(String.format("The class \"%s\" is unable to create instance. Reason is: %s", className, e.getMessage()));
+            logAndThrowException(String.format("The class \"%s\" is unable to create instance. Reason is: %s", className, e.getMessage()));
         }
     }
 
@@ -94,19 +105,18 @@ public final class CLI {
             try (InputStream inputStream = FileUtils.openInputStream(confFile)) {
                 CONFIGURATION.load(inputStream);
             } catch (Exception e) {
-                throw new TextTransformUtilException(
-                        String.format("Unable to open %s. Reason is: %s", configFileDir, e.getMessage())
-                );
+                logAndThrowException(String.format("Unable to open %s. Reason is: %s", configFileDir, e.getMessage()));
             }
         }
         String[] configurations = commandLine.getOptionValues("conf");
         if (null != configurations) {
             for (String configuration : configurations) {
                 int separatorIdx = configuration.indexOf("=");
-                if (0 == separatorIdx)
-                    throw new TextTransformUtilException(
+                if (0 == separatorIdx) {
+                    logAndThrowException(
                             String.format("Invalid configuration %s. The correct format is <key>=<value>.", configuration)
                     );
+                }
 
                 CONFIGURATION.setProperty(configuration.substring(0, separatorIdx), configuration.substring(separatorIdx + 1));
             }
@@ -122,6 +132,10 @@ public final class CLI {
         pipe.transform(SOURCE_PATH, TARGET_PATH, transformer);
     }
 
+    private static void logAndThrowException(String message) {
+        LOGGER.warn(message);
+        throw new TextTransformUtilException(message);
+    }
 
     private static void initCliOption() {
         if (OPTIONS == null) {
